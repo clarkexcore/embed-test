@@ -20,5 +20,69 @@
 				</event-calendar>
 			</div>
 		</div>
+
+		<div style="margin-top: 50px">
+			<iframe
+				id="event-calendar"
+				src="https://embed.admitone.com/"
+				style="width: 80%; height: 800px; border: none"
+			>
+			</iframe>
+
+			<script>
+				let initAttempts = 0;
+
+				function initializeCalendar() {
+					const iframe = document.getElementById("event-calendar");
+
+					if (!iframe || !iframe.contentWindow) {
+						console.error("Iframe not found or not ready");
+						return;
+					}
+
+					const config = {
+						type: "INIT",
+						organizerId: "6058ae501db28071f7b89e0d",
+						theme: "dark",
+						styles: {
+							backgroundColor: "grey",
+							accentColor: "#fc0f03",
+							primaryColor: "#1d58f8",
+							primaryTextColor: "#fff",
+						},
+						timeslots: false,
+					};
+
+					try {
+						iframe.contentWindow.postMessage(config, "*");
+					} catch (error) {
+						console.error("Error sending config:", error);
+
+						// Retry if under max attempts
+						if (initAttempts < MAX_INIT_ATTEMPTS) {
+							initAttempts++;
+							setTimeout(initializeCalendar, 1000);
+						}
+					}
+				}
+
+				window.addEventListener("message", function (event) {
+					if (event.data.type === "CALENDAR_READY") {
+						initializeCalendar();
+					}
+				});
+
+				// Backup initialization
+				window.addEventListener("load", function () {
+					const iframe = document.getElementById("event-calendar");
+
+					if (iframe) {
+						iframe.onload = function () {
+							setTimeout(initializeCalendar, 500);
+						};
+					}
+				});
+			</script>
+		</div>
 	</body>
 </html>
